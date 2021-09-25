@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize._lsq import least_squares
 
 
 def avaliar_componentes_fortescue(fase_a, fase_b, fase_c):
@@ -167,3 +168,33 @@ def queda_tensao_por_km_sinal():
     pass
 
 
+def func_modelo(x, v_sub, i_falta, matriz_m):  # x1 = R, x2 = X, x3 = Distancia
+    eq1 = (i_falta.real * x[0] - i_falta.real * x[1] + matriz_m.real * x[2]) - v_sub.real
+    eq2 = (i_falta.imag * x[0] + i_falta.imag * x[1] + matriz_m.imag * x[2]) - v_sub.imag
+    return np.append(eq1, eq2)
+
+
+def estimar_distancia_lm(v_sub, i_falta, matriz_m):
+    x0 = [0, 0, 0]
+    x1 = least_squares(func_modelo, x0, args=(v_sub, i_falta, matriz_m))
+    return x1
+
+def teste_minimos_quadrados():
+    x = np.arange(1, 5.01, 0.1)
+    n = len(x)
+    y = (x-3)*(x-1)*(x-4)*(x-4.5)*(x+1) + 8*np.cos(x) + 5*np.random.random_sample(n)
+    A = np.array([np.power(x, 5), np.power(x, 4), np.power(x, 3), np.power(x, 2), np.power(x, 1), np.power(x, 0), np.cos(x)]).T
+    th = np.linalg.inv((A.T).dot(A)).dot(A.T).dot(y)
+    print('Acabou')
+
+def estimar_distancia_mmq(v_sub, i_falta, matriz_m):
+    ifalta = np.append(i_falta.real, i_falta.imag)
+    m = np.append(matriz_m.real, matriz_m.imag)
+    y = np.append(v_sub.real, v_sub.imag)
+
+    #A = np.array([np.power(inputs, 1), np.power(inputs, 1), np.power(inputs, 1)])
+    #coefs = np.linalg.inv((A.T).dot(A)).dot(A.T).dot(y)
+
+
+if __name__ == '__main__':
+    teste_minimos_quadrados()

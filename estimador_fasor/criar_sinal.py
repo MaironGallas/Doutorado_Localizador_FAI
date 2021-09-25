@@ -9,7 +9,7 @@ class Sinal():
         self.frequencia = frequencia_rede
         self.taxa_amostragem = taxa_amostragem
         self.step = 1 / frequencia_rede / taxa_amostragem
-        self.tempo = np.arange(0, len(self.sinal) * self.step, self.step)
+        self.tempo = np.arange(1/60, len(self.sinal) * self.step, self.step)
 
     def estimar(self, cfg_fft):
         self.fasor = Fasor(cfg_fft)
