@@ -57,7 +57,6 @@ class Fasor():
                 modulo[i - self.fft.taxa_amostragem] = np.sqrt(fftr * fftr + (ffti * ffti))
                 fase[i - self.fft.taxa_amostragem] = self.calcular_angulo(ffta, ffta_ref, harmonica)
 
-
             self.modulo.append(np.copy(modulo))
             self.fase.append(np.copy(fase))
 

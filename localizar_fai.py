@@ -8,6 +8,31 @@ from estimador_fasor.criar_sinal import Sinal
 from core import *
 from cabo.criar_cabo import Cabo
 
+
+def metodo_novo():
+    matriz_correntes = np.array([[ia.fasor.complexo[1]], [ib.fasor.complexo[1]], [ic.fasor.complexo[1]]]).reshape(3, len(ia.fasor.complexo[1]))
+    matriz_m = cabo.impedancia.dot(matriz_correntes)
+
+    # Condiciona Variaveis
+    v_sub = va.fasor.complexo[1][sync:].flatten()
+    i_falta = ifalta_real.fasor.complexo[1][sync:].flatten()
+    #matriz_m_falta = matriz_m[0][sync:]  # --> Fase A
+    matriz_m_falta = vlinha_a.fasor.complexo[1][sync:].flatten()/2500
+    estimar_distancia_mmq(v_sub, i_falta, matriz_m)
+
+    """# Estimador em Loop
+    parametros = []
+    for i in range(0, len(v_sub)-8):
+        v_sub_janela = v_sub[i:i+8]
+        i_falta_janela = i_falta[i:i+8]
+        matriz_m_falta_janela = matriz_m_falta[i:i+8]
+        parametros_x = estimar_distancia_lm(v_sub_janela, i_falta_janela, matriz_m_falta_janela)
+        print(parametros_x.x[2])
+        parametros.append(parametros_x.x)
+
+    print("Acabou")"""
+
+
 if __name__ == '__main__':
     AMOSTRAGEM = 256
     FREQUENCIA_REDE = 60
@@ -61,28 +86,7 @@ if __name__ == '__main__':
     # Calcular Matriz M
     cabo = Cabo("P-150")
 
-    matriz_correntes = np.array([[ia.fasor.complexo[1]], [ib.fasor.complexo[1]], [ic.fasor.complexo[1]]]).reshape(3, len(ia.fasor.complexo[1]))
-    matriz_m = cabo.impedancia.dot(matriz_correntes)
-
     # Encontra Indice do Tempo
-    sync = find_indice_tempo(va.tempo, TEMPO)
+    #sync = find_indice_tempo(va.tempo, TEMPO)
 
-    # Condiciona Variaveis
-    v_sub = va.fasor.complexo[1][sync:].flatten()
-    i_falta = ifalta_real.fasor.complexo[1][sync:].flatten()
-    #matriz_m_falta = matriz_m[0][sync:]  # --> Fase A
-    matriz_m_falta = vlinha_a.fasor.complexo[1][sync:].flatten()/2500
 
-    estimar_distancia_mmq(v_sub, i_falta, matriz_m)
-
-    """# Estimador em Loop
-    parametros = []
-    for i in range(0, len(v_sub)-8):
-        v_sub_janela = v_sub[i:i+8]
-        i_falta_janela = i_falta[i:i+8]
-        matriz_m_falta_janela = matriz_m_falta[i:i+8]
-        parametros_x = estimar_distancia_lm(v_sub_janela, i_falta_janela, matriz_m_falta_janela)
-        print(parametros_x.x[2])
-        parametros.append(parametros_x.x)
-    
-    print("Acabou")"""

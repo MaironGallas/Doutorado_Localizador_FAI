@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize._lsq import least_squares
+from scipy.interpolate import interp1d
 
 
 def avaliar_componentes_fortescue(fase_a, fase_b, fase_c):
@@ -74,7 +75,7 @@ def cart2pol(x, y):
 
 def my_fft(sinal, frequencia_amostragem):
     """
-    Função para realizar a Transformada de Fourier de um Sinal e executar a plotagem no dominio da frequecia.
+    Função para realizar a Transformada de Fourier de um Sinal e executar a plotagem no dominio da frequencia.
     :param sinal:
     :param taxa_amostragem:
     :return:
@@ -89,8 +90,10 @@ def my_fft(sinal, frequencia_amostragem):
     fourier_transform = np.fft.fft(sinal) / tamanho  # FFT normalizada do vetor sinal sobre tamanho
     fourier_transform = fourier_transform[range(int(tamanho / 2))]  # Ajusta o eixo do sinal
 
-    plt.plot(frequencias, abs(fourier_transform))
-    plt.show()
+    #plt.plot(frequencias, 2*abs(fourier_transform))
+    #plt.show()
+
+    return fourier_transform, frequencias
 
 
 def simetrico2fase():
@@ -179,6 +182,7 @@ def estimar_distancia_lm(v_sub, i_falta, matriz_m):
     x1 = least_squares(func_modelo, x0, args=(v_sub, i_falta, matriz_m))
     return x1
 
+
 def teste_minimos_quadrados():
     x = np.arange(1, 5.01, 0.1)
     n = len(x)
@@ -186,6 +190,7 @@ def teste_minimos_quadrados():
     A = np.array([np.power(x, 5), np.power(x, 4), np.power(x, 3), np.power(x, 2), np.power(x, 1), np.power(x, 0), np.cos(x)]).T
     th = np.linalg.inv((A.T).dot(A)).dot(A.T).dot(y)
     print('Acabou')
+
 
 def estimar_distancia_mmq(v_sub, i_falta, matriz_m):
     ifalta = np.append(i_falta.real, i_falta.imag)
@@ -195,6 +200,26 @@ def estimar_distancia_mmq(v_sub, i_falta, matriz_m):
     #A = np.array([np.power(inputs, 1), np.power(inputs, 1), np.power(inputs, 1)])
     #coefs = np.linalg.inv((A.T).dot(A)).dot(A.T).dot(y)
 
+
+def func_distancia(x, v_linha_filter, v_sub_filter, v_falta_estimada_filter):
+    return x[0]*v_linha_filter + v_falta_estimada_filter - v_sub_filter
+
+
+def calcular_distancia_lm(queda_tensao_linha_vetor, vsub, vestimado):
+    x0 = [10000]
+    x1 = least_squares(func_distancia, x0, args=(queda_tensao_linha_vetor, vsub, vestimado))
+    return x1.x
+
+
+def interpolar(sinal, tempo):
+    step_min = 1E-6
+    tempo_interpolado = np.arange(tempo[0], tempo[-1]-step_min, step_min)
+    step_interpolado = tempo_interpolado[1] - tempo_interpolado[0]
+
+    cubic_interp = interp1d(tempo, sinal, kind='cubic')
+    sinal_interpolado = cubic_interp(tempo_interpolado)
+
+    return sinal_interpolado, step_interpolado, tempo_interpolado
 
 if __name__ == '__main__':
     teste_minimos_quadrados()

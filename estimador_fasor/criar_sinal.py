@@ -1,5 +1,5 @@
 import numpy as np
-
+from core import interpolar
 from estimador_fasor.criar_fasor import Fasor
 
 
@@ -9,13 +9,17 @@ class Sinal():
         self.frequencia = frequencia_rede
         self.taxa_amostragem = taxa_amostragem
         self.step = 1 / frequencia_rede / taxa_amostragem
-        self.tempo = np.arange(1/60, len(self.sinal) * self.step, self.step)
+        self.tempo = np.arange(0, len(self.sinal) * self.step, self.step)
 
     def estimar(self, cfg_fft):
         self.fasor = Fasor(cfg_fft)
         self.fasor.estimar(self.sinal)
         self.fasor.complex()
-        #elf.criar_sinal_3harmonica()
+        self.interpolar()
+        #self.criar_sinal_3harmonica()
+
+    def interpolar(self):
+        self.sinal_interpolado, self.step_interpolado, self.tempo_interpolado = interpolar(self.sinal, self.tempo)
 
     """def criar_sinal_3harmonica(self):
         sinal_3h = np.zeros(len(self.sinal))
